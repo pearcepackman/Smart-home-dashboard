@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, FlatList } from "react-native";
 import { LineChart } from 'react-native-chart-kit';
 
 
-
+//Setting the type of each type of data i'm getting
 type SensorData = {
   temperature: number;
   humidity: number;
@@ -11,14 +11,13 @@ type SensorData = {
   motion: number;
   light: string;
 };
-
-
+//downsample helps to compress the data, allowing it to be shown easily
 const downsample = (arr: number[], maxPoints: number = 150) => {
   if (arr.length <= maxPoints) return arr;
   const step = Math.floor(arr.length / maxPoints);
   return arr.filter((_, i) => i % step === 0);
 };
-
+//rollingAverage helps to smooth the data, makes trends easier to see
 const rollingAverage = (arr: number[], windowSize: number = 5) => {
   return arr.map((_, i) => {
     const start = Math.max(0, i - windowSize + 1);
@@ -28,20 +27,17 @@ const rollingAverage = (arr: number[], windowSize: number = 5) => {
   });
 };
 
-
-
-
 export default function HomeScreen() {
   const [data, setData] = useState<SensorData | null>(null);
   const [history, setHistory] = useState<SensorData[]>([]);
 
-
+  //Fetching data from history
   useEffect(() => {
     const fetchData = async () => {
   try {
     const [latestRes, historyRes] = await Promise.all([
       fetch("http://10.0.0.45:3000/latest"),
-      fetch("http://10.0.0.45:3000/history?limit=3600")
+      fetch("http://10.0.0.45:3000/history?limit=3600") //Getting the last hour of info
     ]);
 
     const latestJson = await latestRes.json();
@@ -65,14 +61,13 @@ export default function HomeScreen() {
   const smoothed = rollingAverage(history.map(h => h.temperature), 5);
   const avgSmoothed = smoothed.reduce((acc, val) => acc + val, 0) / smoothed.length;
 
-
   const sensorArray = data
   ? [
       {
         title: "Temperature",
         value: `${data.temperature}°`,
         data: downsample(rollingAverage(history.map(h => h.temperature), 60), 150),
-        average: (() => {
+        average: (() => { //Calculating an average here, makes the data easier to look at
           const arr = rollingAverage(history.map(h => h.temperature), 60);
           return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
         })(),
@@ -155,9 +150,9 @@ export default function HomeScreen() {
       <LineChart
         data={{
           labels: [],
-          datasets: [{ data: item.data.slice(-300) }],
+          datasets: [{ data: item.data.slice(-300) }], //Getting the last 300 pieces to show
         }}
-        width={330}          // make it fit inside the card
+        width={330} 
         height={215}
         bezier
         yAxisSuffix={item.suffix}
@@ -194,6 +189,7 @@ export default function HomeScreen() {
     </View>
   );
 }
+//Style information
 const styles = StyleSheet.create({
   container: {
     padding: 5,
