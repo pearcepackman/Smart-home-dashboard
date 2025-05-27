@@ -35,9 +35,39 @@ export default function TabLayout() {
         name="index"
         options={{
           title:"Overview",
-          tabBarIcon: ({ color }) => <IconSymbol size={40} name = "house.circle.fill" color = {color}/>,
+          tabBarIcon: ({ color, focused }) => (
+          <IconSymbol 
+          size={35} 
+          name = {focused ? "house.fill" : "house"} 
+          color = {color}
+          />
+          ),
           tabBarLabelStyle: {
-            fontSize: 14,
+            fontSize: 12,
+            fontWeight: "700",
+            marginTop: 3,
+          },
+          tabBarStyle: {
+            backgroundColor: "#ffffff",
+            
+          }
+        }}
+        />
+        
+
+        <Tabs.Screen
+        name="history"
+        options={{
+          title:"History",
+          tabBarIcon: ({ color, focused }) => (
+          <IconSymbol 
+          size={35} 
+          name = {focused ? "chart.bar.fill" : "chart.bar"} 
+          color = {color}
+          />
+          ),
+          tabBarLabelStyle: {
+            fontSize: 12,
             fontWeight: "700",
             marginTop: 3,
           },

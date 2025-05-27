@@ -12,6 +12,7 @@ type SensorData = {
   light: string;
 };
 
+
 const downsample = (arr: number[], maxPoints: number = 150) => {
   if (arr.length <= maxPoints) return arr;
   const step = Math.floor(arr.length / maxPoints);
@@ -27,6 +28,9 @@ const rollingAverage = (arr: number[], windowSize: number = 5) => {
   });
 };
 
+
+
+
 export default function HomeScreen() {
   const [data, setData] = useState<SensorData | null>(null);
   const [history, setHistory] = useState<SensorData[]>([]);
@@ -37,7 +41,7 @@ export default function HomeScreen() {
   try {
     const [latestRes, historyRes] = await Promise.all([
       fetch("http://10.0.0.45:3000/latest"),
-      fetch("http://10.0.0.45:3000/history?limit=60")
+      fetch("http://10.0.0.45:3000/history?limit=3600")
     ]);
 
     const latestJson = await latestRes.json();
@@ -58,44 +62,71 @@ export default function HomeScreen() {
   }, []);
 
   
+  const smoothed = rollingAverage(history.map(h => h.temperature), 5);
+  const avgSmoothed = smoothed.reduce((acc, val) => acc + val, 0) / smoothed.length;
+
+
   const sensorArray = data
   ? [
       {
         title: "Temperature",
         value: `${data.temperature}°`,
-        data: downsample(rollingAverage(history.map(h => h.temperature), 5), 60),
+        data: downsample(rollingAverage(history.map(h => h.temperature), 60), 150),
+        average: (() => {
+          const arr = rollingAverage(history.map(h => h.temperature), 60);
+          return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
+        })(),
         suffix: "°"
       },
       {
         title: "Humidity",
         value: `${data.humidity}%`,
-        data: downsample(rollingAverage(history.map(h => h.humidity), 5), 60),
+        data: downsample(rollingAverage(history.map(h => h.humidity), 60), 150),
+        average: (() => {
+          const arr = rollingAverage(history.map(h => h.humidity), 60);
+          return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
+        })(),
         suffix: "%"
       },
       {
         title: "Air Quality",
         value: `${data.air_quality}`,
-        data: downsample(rollingAverage(history.map(h => h.air_quality), 5), 60),
+        data: downsample(rollingAverage(history.map(h => h.air_quality), 60), 150),
+        average: (() => {
+          const arr = rollingAverage(history.map(h => h.air_quality), 60);
+          return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
+        })(),
         suffix: ""
       },
       {
         title: "Light",
-        value:  data.light === "light" ? "Light" : "Dark",
-        data: history.map(h => {
+        value: data.light === "light" ? "Light" : "Dark",
+        data: downsample(rollingAverage(history.map(h => {
           const val = h.light?.toLowerCase();
-          return val === "light" ? 1 : 0; // replace NaN with 0
-        }),
+          return val === "light" ? 1 : 0;
+        }), 60), 150),
+        average: (() => {
+          const arr = rollingAverage(history.map(h => {
+            const val = h.light?.toLowerCase();
+            return val === "light" ? 1 : 0;
+          }), 60);
+          return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
+        })(),
         suffix: ""
       },
-
       {
         title: "Motion",
         value: data.motion === 1 ? "Detected" : "None",
-        data: downsample(rollingAverage(history.map(h => h.motion), 5), 60),
+        data: downsample(rollingAverage(history.map(h => h.motion), 60), 150),
+        average: (() => {
+          const arr = rollingAverage(history.map(h => h.motion), 60);
+          return arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : "N/A";
+        })(),
         suffix: ""
       },
     ]
   : [];
+
 
   
 
@@ -105,35 +136,35 @@ export default function HomeScreen() {
       <Text style={styles.header}>
         Hello, <Text style={styles.name}>Pearce</Text>
       </Text>
-      <Text style={styles.dashboardtitle}>Overview - Bedroom</Text>
+      <Text style={styles.dashboardtitle}>History - Bedroom</Text>
 
       {data ? (
         <FlatList
         
           data={sensorArray}
           keyExtractor={(item, index) => index.toString()}
-          numColumns={2}
+          numColumns={1}
           contentContainerStyle={styles.graphcontainer}
           renderItem={({ item }) => (
             
   <View style={styles.card}>
-    <Text style={styles.cardTitle}>{item.title}</Text>
-    <Text style={styles.cardValue}>{item.value}</Text>
+    <Text style={styles.cardTitle}>Average {item.title} (60 Min)</Text>
+    <Text style={styles.cardValue}>{item.average}{item.suffix}</Text>
 
     {item.data.length > 1 && (
       <LineChart
         data={{
           labels: [],
-          datasets: [{ data: item.data.slice(-60) }],
+          datasets: [{ data: item.data.slice(-300) }],
         }}
-        width={140}          // make it fit inside the card
-        height={115}
+        width={330}          // make it fit inside the card
+        height={215}
         bezier
         yAxisSuffix={item.suffix}
         withDots={false}
         withInnerLines={false}
         withOuterLines={false}
-        withVerticalLabels={false}
+        withVerticalLabels={true}
         withHorizontalLabels={false}
         chartConfig={{
           backgroundGradientFrom: "#ffffff",
@@ -163,7 +194,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     padding: 5,
@@ -198,8 +228,8 @@ const styles = StyleSheet.create({
     margin: 8,
     borderRadius: 12,
     padding: 16,
-    minWidth: "45%",
-    height: 200,
+    minWidth: "80%",
+    height: 300,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -207,12 +237,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 22,
     fontWeight: "600",
     color: "#212529",
   },
   cardValue: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "700",
     color: "#0077b6",
     marginTop: 8,
