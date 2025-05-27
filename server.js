@@ -64,6 +64,7 @@ app.get("/history", (req, res) => {
   const limit = parseInt(req.query.limit) || 100;
   db.all(
     `SELECT * FROM readings ORDER BY timestamp DESC LIMIT ?`,
+    [limit],
     (err, rows) => {
       if (err) {
         console.error(err.message);
