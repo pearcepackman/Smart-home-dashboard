@@ -36,9 +36,10 @@ export default function HomeScreen() {
     const fetchData = async () => {
   try {
     const [latestRes, historyRes] = await Promise.all([
-      fetch("http://10.0.0.45:3000/latest"),
-      fetch("http://10.0.0.45:3000/history?limit=60")
+      fetch("http://10.0.0.60:3000/latest"),
+      fetch("http://10.0.0.60:3000/history?limit=60")
     ]);
+
     //Parsing the JSON
     const latestJson = await latestRes.json();
     const historyJson: SensorData[] = await historyRes.json();
