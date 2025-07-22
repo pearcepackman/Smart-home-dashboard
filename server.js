@@ -3,6 +3,8 @@ const express = require("express");
 const SerialPort = require("serialport").SerialPort;
 const ReadlineParser = require("@serialport/parser-readline").ReadlineParser;
 const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
+
 
 const db = new sqlite3.Database("./sensor_data.db");
 
@@ -23,6 +25,7 @@ db.serialize(() => {
 
 const app = express();
 const PORT = 3000;
+app.use(cors());
 
 const portPath = "COM3";
 const BAUD_RATE = 115200;
