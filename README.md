@@ -8,6 +8,7 @@ This is a full-stack Internet of Things (IoT) project that collects, stores, and
 - Interactive app displaying live and historical data
 - Easy data visualization using data smoothing and downsampling
 - Modular architecture designed to easily handle new sensors
+- Containerized deployment using Docker and Docker Compose
 
 ## Media
 <table align="center" style="width: 100%; table-layout: fixed;">
@@ -49,21 +50,31 @@ This was my first project with hardware and an IoT focus. I found working with h
 
 **NOTE:** This repository is a technical demonstration and portfolio project as opposed to a proper IoT program that can be easily replicated yourself. The ESP32 device must be connected on your local network to send sensor data to the server, and the app must be connected on that same network in order to receive the data. This means this project will not work on your device. If you're curious to try it yourself, here are the build instructions.
 
-### Getting Started
-1. Install any dependencies and start the Node.js server:
-     ```bash
-    npm install
-    node server.js
-    ```
-2. Launch expo to begin the app
-     - Download Expo Go from your app store
+## Getting Started
+You can now run this entire project (backend + frontend) quickly and easily using Docker!
+
+### Prerequisites
+- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- Install [Git](https://git-scm.com/) 
+1. Install Docker and Docker Compose
+2. Clone this repo
+
+### Quick Setup
+1. **Clone this repository**
     ```bash
-    npx expo start
-    ```
-    - Scan the QR code to view the app
+   git clone https://github.com/pearcepackman/smart-home-dashboard.git
+   cd smart-home-dashboard
+2. **Run the full stack**
+    ```bash 
+    docker compose up --build
+3. **Visit the app**
+    - Frontend: http://localhost
+    - Backend API: http://localhost:3000/latest, http://localhost:3000/history
 
-## Author
-**Pearce Packman** - [Website](https://pearcepackman.com/) | [LinkedIn](https://www.linkedin.com/in/pearce-packman/)
-
-## License
-This project is licensed under the MIT License
+## Contact:
+If you like this project and want to chat with me, here's some of my links! :)
+<p align="center">
+  <a href="https://pearcepackman.com/" target="_blank">🌐 Portfolio Website</a> |
+  <a href="https://www.linkedin.com/in/pearce-packman/" target="_blank">🔗 LinkedIn</a> |
+  <a href="mailto:pearcepackman@gmail.com">📧 Email</a>
+</p>

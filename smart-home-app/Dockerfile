@@ -1,18 +1,24 @@
-# Base image
-FROM node:20-alpine
+FROM node:20
 
-# Set working directory
 WORKDIR /app
 
-# Install serve
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Export static web app
+RUN npx expo export --platform web --output-dir web-build
+
+# Copy Netlify-style redirects (optional but good for SPA routing)
+COPY _redirects web-build/_redirects
+
+# Install static server
 RUN npm install -g serve
 
-# Copy pre-built static files
-COPY dist/ ./dist
-
-# Set working directory to dist folder
-WORKDIR /app/dist
-
-# Serve the web app
 EXPOSE 80
-CMD ["serve", "-s", ".", "-l", "80"]
+
+# Serve the static web app
+CMD ["serve", "-s", "web-build", "-l", "80"]

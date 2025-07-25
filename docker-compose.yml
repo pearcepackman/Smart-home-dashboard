@@ -1,17 +1,12 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: pearcepackman/smart-home-backend
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-    command: node server.js
+    restart: unless-stopped
 
   frontend:
-    build:
-      context: ./smart-home-app
-      dockerfile: Dockerfile
+    image: pearcepackman/smart-home-frontend
     ports:
-      - "8080:80"
+      - "80:80"
+    restart: unless-stopped
